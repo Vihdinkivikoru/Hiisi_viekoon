@@ -1,694 +1,678 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="fi">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.5">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR-koodien uudelleenohjausjärjestelmä</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .tab-button {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .admin-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .qr-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .qr-card canvas {
+            margin: 10px auto;
+        }
+
+        .url-config {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .url-config h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .button.danger {
+            background: #dc3545;
+        }
+
+        .button.danger:hover {
+            background: #c82333;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .error-message {
+            color: #dc3545;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .download-btn {
+            text-decoration: none;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
-<p class="p1">&lt;!DOCTYPE html&gt;</p>
-<p class="p1">&lt;html lang="fi"&gt;</p>
-<p class="p1">&lt;head&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;QR-koodien uudelleenohjausjärjestelmä&lt;/title&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"&gt;&lt;/script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>* {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-sizing: border-box;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>min-height: 100vh;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.container {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 1400px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 auto;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2.5em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 2px 2px 4px rgba(0,0,0,0.2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tabs {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-button {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 6px rgba(0,0,0,0.1);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-button:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 6px 12px rgba(0,0,0,0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-button.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-content {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.tab-content.active {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.admin-panel {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 10px 30px rgba(0,0,0,0.2);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.qr-grid {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.qr-card {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 8px rgba(0,0,0,0.1);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: transform 0.2s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.qr-card:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-5px);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 12px rgba(0,0,0,0.15);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.qr-card canvas {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin: 10px auto;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.url-config {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #f8f9fa;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-left: 4px solid #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.url-config h3 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-group {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-group label {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 5px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #333;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-group input {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #e0e0e0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 5px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: border-color 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.form-group input:focus {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>outline: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.button {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 24px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 5px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 14px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.button:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #5568d3;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transform: translateY(-2px);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.button.danger {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #dc3545;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.button.danger:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #c82333;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.stats {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 30px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.stat-card {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.stat-card h3 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2em;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 5px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.login-overlay {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>left: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>right: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>bottom: 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: rgba(0,0,0,0.8);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>z-index: 1000;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.login-box {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 40px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 15px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 10px 30px rgba(0,0,0,0.3);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>max-width: 400px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 90%;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.login-box h2 {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.logout-btn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>position: fixed;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>top: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>right: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: white;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px 20px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 600;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.3s;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.logout-btn:hover {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>background: #667eea;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.error-message {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>color: #dc3545;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-top: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.search-box {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.search-box input {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid #e0e0e0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>font-size: 16px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.action-buttons {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>.download-btn {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>text-decoration: none;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>display: inline-block;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
-<p class="p1">&lt;/head&gt;</p>
-<p class="p1">&lt;body&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="login-overlay" class="login-overlay"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="login-box"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;h2&gt;🔐 Kirjaudu sisään&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="form-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;label for="password-input"&gt;Salasana:&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;input type="password" id="password-input" placeholder="Syötä salasana" onkeypress="if(event.key === 'Enter') checkPassword()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;button class="button" onclick="checkPassword()" style="width: 100%;"&gt;Kirjaudu&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="error-message" id="error-message"&gt;Väärä salasana!&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;button id="logout-btn" class="logout-btn" onclick="logout()" style="display: none;"&gt;Kirjaudu ulos&lt;/button&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="main-content" style="display: none;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="container"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1&gt;🔗 QR-koodien hallinta&lt;/h1&gt;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="tabs"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button active" onclick="switchTab('qr-codes')"&gt;QR-koodit&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;button class="tab-button" onclick="switchTab('url-config')"&gt;URL-asetukset&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="qr-codes" class="tab-content active"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="admin-panel"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="stats"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="stat-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;h3 id="configured-qr"&gt;0&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p&gt;Konfiguroitua QR-koodia&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div class="stat-card"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;h3 id="unconfigured-qr"&gt;100&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;p&gt;Konfiguroimatonta&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="text-align: center; margin-bottom: 20px;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="button" onclick="downloadAllQRs()" style="font-size: 16px; padding: 12px 30px;"&gt;📥 Lataa kaikki QR-koodit&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="qr-grid" id="qr-grid"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;div id="url-config" class="tab-content"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="admin-panel"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="action-buttons"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="button" onclick="exportConfig()"&gt;📥 Lataa asetukset&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="button" onclick="document.getElementById('import-file').click()"&gt;📤 Tuo asetukset&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="file" id="import-file" accept=".json" style="display: none;" onchange="importConfig(event)"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="search-box"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="text" id="search" placeholder="🔍 Hae QR-koodia..." oninput="filterConfigs()"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p2"><span class="Apple-converted-space">                    </span></p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div id="config-list"&gt;&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const TOTAL_QR_CODES = 100;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>const ADMIN_PASSWORD = 'pohhoc-3kawtI-xikwin';</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function checkPassword() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const password = document.getElementById('password-input').value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const errorMsg = document.getElementById('error-message');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (password === ADMIN_PASSWORD) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>localStorage.setItem('isLoggedIn', 'true');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('login-overlay').style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('main-content').style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('logout-btn').style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>errorMsg.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>generateQRCodes();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>generateConfigList();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>updateStats();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>errorMsg.style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('password-input').value = '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function isLoggedIn() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return localStorage.getItem('isLoggedIn') === 'true';</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function logout() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>localStorage.removeItem('isLoggedIn');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>location.reload();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function switchTab(tabName) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.tab-content').forEach(tab =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>tab.classList.remove('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.querySelectorAll('.tab-button').forEach(btn =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>btn.classList.remove('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById(tabName).classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>event.target.classList.add('active');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function generateQRCodes() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const grid = document.getElementById('qr-grid');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>grid.innerHTML = '';</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const baseURL = window.location.origin + window.location.pathname;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= TOTAL_QR_CODES; i++) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const qrId = String(i).padStart(3, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const url = `${baseURL}?qr=${qrId}`;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const card = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>card.className = 'qr-card';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>card.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3&gt;QR ${qrId}&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;canvas id="qr-${qrId}"&gt;&lt;/canvas&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; justify-content: center;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;a href="${url}" target="_blank" class="button download-btn" style="font-size: 12px; padding: 8px 12px;"&gt;Testaa&lt;/a&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="button" onclick="downloadQR('${qrId}')" style="font-size: 12px; padding: 8px 12px;"&gt;📥 Lataa&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>grid.appendChild(card);</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>new QRious({</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>element: document.getElementById(`qr-${qrId}`),</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>value: url,</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>size: 150</p>
-<p class="p1"><span class="Apple-converted-space">                </span>});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function getRedirectURLs() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const stored = localStorage.getItem('qr-redirects');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (stored) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const urls = JSON.parse(stored);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('Ladattu localStorage:', urls);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return urls;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Oletusarvoiset URL-osoitteet (vain jos ei ole tallennettuja)</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const defaultURLs = {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'001': 'https://www.puuhapark.fi',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'002': 'https://www.hiidenlinna.com/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'003': 'https://www.vihtiski.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'004': 'https://vihdinkino.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'005': 'https://hillside.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'006': 'https://koirankuje.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'007': 'https://www.unitedfestivals.fi/hiidenkirnufestival/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'008': 'https://www.veikkolankartano.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'009': 'https://www.vihtiseura.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'010': 'https://hevoslaakso.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'011': 'https://www.hawkhill.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'012': 'https://www.nuuksiontaika.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'013': 'https://studio59.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'014': 'https://www.visitvihti.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'015': 'https://www.vihti.fi/kulttuuri-ja-vapaa-aika/museo/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'016': 'https://selli.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'017': 'https://ilonaliikunta.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'018': 'https://www.ofeigur.net/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'019': 'https://www.pahantorjuja.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'020': 'https://vinha.net/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'021': 'https://liikuntakeskusposeidon.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'022': 'https://www.villajoutsela.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'023': 'https://www.skuti.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'024': 'https://poistielta.com/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'025': 'https://www.nups.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'026': 'https://vihdinteatteri.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'027': 'https://vihti.mll.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'028': 'https://www.suurvihdinkilta.com/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'029': 'https://vihdinkalastusseura.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'030': 'https://www.harjunkiekko.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'031': 'https://www.rasti-vihti.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'032': 'https://www.dogsndeli.fi/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'033': 'https://www.visitvihti.fi/seikkailu/wefly/',</p>
-<p class="p1"><span class="Apple-converted-space">                </span>'034': 'https://www.vihti.fi/kulttuuri-ja-vapaa-aika/galleria-pictor/'</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Tallennetaan oletusarvot localStorageen vain ensimmäisellä kerralla</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Alustetaan oletusarvot');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>localStorage.setItem('qr-redirects', JSON.stringify(defaultURLs));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return defaultURLs;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function saveRedirectURL(qrId, url) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('saveRedirectURL kutsuttu:', qrId, url);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urls = getRedirectURLs();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Nykyiset URL:t ennen tallennusta:', urls);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (url &amp;&amp; url.trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>urls[qrId] = url.trim();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('Lisätty:', qrId, '→', url.trim());</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>delete urls[qrId];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('Poistettu:', qrId);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>localStorage.setItem('qr-redirects', JSON.stringify(urls));</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Tallennettu localStorageen:', urls);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>// Tarkista että todella tallentui</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const verification = localStorage.getItem('qr-redirects');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Varmistus - localStorage sisältö:', JSON.parse(verification));</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>updateStats();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>generateConfigList(); // Päivitetään lista</p>
-<p class="p1"><span class="Apple-converted-space">            </span>return true;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function saveAndNotify(qrId) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('saveAndNotify kutsuttu QR:lle', qrId);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urlInput = document.getElementById(`url-${qrId}`);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('URL input elementti:', urlInput);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const url = urlInput.value;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('URL arvo:', url);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!url || !url.trim()) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('URL tyhjä!');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert('Syötä URL-osoite ensin!');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!url.startsWith('http://') &amp;&amp; !url.startsWith('https://')) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('URL ei ala http(s)://');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>alert('URL:n pitää alkaa http:// tai https://');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Kutsutaan saveRedirectURL');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>saveRedirectURL(qrId, url);</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const status = document.getElementById(`status-${qrId}`);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (status) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>status.style.display = 'inline';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>setTimeout(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>status.style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}, 2000);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>console.log('Tallennus valmis');</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function generateConfigList() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const list = document.getElementById('config-list');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>list.innerHTML = '';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urls = getRedirectURLs();</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 1; i &lt;= TOTAL_QR_CODES; i++) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const qrId = String(i).padStart(3, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const currentURL = urls[qrId] || '';</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const config = document.createElement('div');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>config.className = 'url-config';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>config.dataset.qrId = qrId;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>config.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;h3&gt;QR ${qrId}&lt;/h3&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div class="form-group"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;label for="url-${qrId}"&gt;Kohde-URL:&lt;/label&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;input type="url" id="url-${qrId}" value="${currentURL}"<span class="Apple-converted-space"> </span></p>
-<p class="p1"><span class="Apple-converted-space">                               </span>placeholder="https://example.com"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div style="display: flex; gap: 10px; align-items: center;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;button class="button" onclick="saveAndNotify('${qrId}')" style="font-size: 13px; padding: 8px 16px;"&gt;💾 Tallenna&lt;/button&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>${currentURL ? `&lt;button class="button danger" onclick="clearURL('${qrId}')" style="font-size: 13px; padding: 8px 16px;"&gt;🗑️ Tyhjennä&lt;/button&gt;` : ''}</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span id="status-${qrId}" style="color: green; font-size: 12px; display: none;"&gt;✓ Tallennettu&lt;/span&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>`;</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>list.appendChild(config);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function clearURL(qrId) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (confirm(`Haluatko varmasti tyhjentää QR ${qrId} URL:n?`)) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>saveRedirectURL(qrId, '');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>generateConfigList();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function downloadQR(qrId) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const canvas = document.getElementById(`qr-${qrId}`);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const url = canvas.toDataURL('image/png');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const link = document.createElement('a');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.download = `QR-${qrId}.png`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.href = url;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.click();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function downloadAllQRs() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!confirm('Haluatko ladata kaikki 100 QR-koodia? Tämä voi kestää hetken.')) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>let downloaded = 0;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const interval = setInterval(() =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (downloaded &gt;= TOTAL_QR_CODES) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>clearInterval(interval);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('Kaikki QR-koodit ladattu!');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>downloaded++;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const qrId = String(downloaded).padStart(3, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>downloadQR(qrId);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}, 200); // 200ms viive jokaisen latauksen välillä</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function filterConfigs() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const search = document.getElementById('search').value.toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const configs = document.querySelectorAll('.url-config');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>configs.forEach(config =&gt; {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const qrId = config.dataset.qrId.toLowerCase();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>config.style.display = qrId.includes(search) ? 'block' : 'none';</p>
-<p class="p1"><span class="Apple-converted-space">            </span>});</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function exportConfig() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urls = getRedirectURLs();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const dataStr = JSON.stringify(urls, null, 2);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const dataBlob = new Blob([dataStr], {type: 'application/json'});</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const url = URL.createObjectURL(dataBlob);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const link = document.createElement('a');</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.href = url;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.download = `qr-config-${new Date().toISOString().split('T')[0]}.json`;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>link.click();</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function importConfig(event) {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const file = event.target.files[0];</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (!file) return;</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>const reader = new FileReader();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>reader.onload = function(e) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>const config = JSON.parse(e.target.result);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>localStorage.setItem('qr-redirects', JSON.stringify(config));</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('Asetukset tuotu onnistuneesti!');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>generateConfigList();</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>updateStats();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} catch (error) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>alert('Virhe asetuksia tuotaessa: ' + error.message);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>};</p>
-<p class="p1"><span class="Apple-converted-space">            </span>reader.readAsText(file);</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function updateStats() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urls = getRedirectURLs();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const configured = Object.keys(urls).length;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const unconfigured = TOTAL_QR_CODES - configured;</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('configured-qr').textContent = configured;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('unconfigured-qr').textContent = unconfigured;</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>function handleRedirect() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urlParams = new URLSearchParams(window.location.search);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>let qrId = urlParams.get('qr');</p>
-<p class="p2"><span class="Apple-converted-space">            </span></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (qrId) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>// Normalisoi QR ID kolminumeroiseksi (esim. "35" -&gt; "035")</p>
-<p class="p1"><span class="Apple-converted-space">                </span>qrId = String(qrId).padStart(3, '0');</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('QR redirect: qrId =', qrId);</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>const urls = getRedirectURLs();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('Kaikki URL:t:', urls);</p>
-<p class="p1"><span class="Apple-converted-space">                </span>const targetURL = urls[qrId];</p>
-<p class="p1"><span class="Apple-converted-space">                </span>console.log('Haettu URL avaimella', qrId, ':', targetURL);</p>
-<p class="p2"><span class="Apple-converted-space">                </span></p>
-<p class="p1"><span class="Apple-converted-space">                </span>if (targetURL) {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.log('Ohjataan:', targetURL);</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>window.location.href = targetURL;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>console.log('URL ei löytynyt!');</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>document.body.innerHTML = `</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-family: sans-serif;"&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;h2 style="color: #dc3545;"&gt;⚠️ QR-koodi ${qrId} ei ole konfiguroitu&lt;/h2&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;p&gt;Ota yhteyttä järjestelmän ylläpitäjään.&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                                </span>&lt;p style="font-size: 12px; color: #666; margin-top: 20px;"&gt;Debug: Avain "${qrId}" ei löydy localStoragesta&lt;/p&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                            </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/div&gt;</p>
-<p class="p1"><span class="Apple-converted-space">                    </span>`;</p>
-<p class="p1"><span class="Apple-converted-space">                </span>}</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">        </span>window.addEventListener('DOMContentLoaded', function() {</p>
-<p class="p1"><span class="Apple-converted-space">            </span>const urlParams = new URLSearchParams(window.location.search);</p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (urlParams.get('qr')) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>handleRedirect();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>return;</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p2"><br></p>
-<p class="p1"><span class="Apple-converted-space">            </span>if (isLoggedIn()) {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('login-overlay').style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('main-content').style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('logout-btn').style.display = 'block';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>generateQRCodes();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>generateConfigList();</p>
-<p class="p1"><span class="Apple-converted-space">                </span>updateStats();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('login-overlay').style.display = 'flex';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('main-content').style.display = 'none';</p>
-<p class="p1"><span class="Apple-converted-space">                </span>document.getElementById('password-input').focus();</p>
-<p class="p1"><span class="Apple-converted-space">            </span>}</p>
-<p class="p1"><span class="Apple-converted-space">        </span>});</p>
-<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
-<p class="p1">&lt;/body&gt;</p>
-<p class="p1">&lt;/html&gt;</p>
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h2>🔐 Kirjaudu sisään</h2>
+            <div class="form-group">
+                <label for="password-input">Salasana:</label>
+                <input type="password" id="password-input" placeholder="Syötä salasana" onkeypress="if(event.key === 'Enter') checkPassword()">
+            </div>
+            <button class="button" onclick="checkPassword()" style="width: 100%;">Kirjaudu</button>
+            <div class="error-message" id="error-message">Väärä salasana!</div>
+        </div>
+    </div>
+
+    <button id="logout-btn" class="logout-btn" onclick="logout()" style="display: none;">Kirjaudu ulos</button>
+
+    <div id="main-content" style="display: none;">
+        <div class="container">
+            <h1>🔗 QR-koodien hallinta</h1>
+            
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('qr-codes')">QR-koodit</button>
+                <button class="tab-button" onclick="switchTab('url-config')">URL-asetukset</button>
+            </div>
+
+            <div id="qr-codes" class="tab-content active">
+                <div class="admin-panel">
+                    <div class="stats">
+                        <div class="stat-card">
+                            <h3 id="configured-qr">0</h3>
+                            <p>Konfiguroitua QR-koodia</p>
+                        </div>
+                        <div class="stat-card">
+                            <h3 id="unconfigured-qr">100</h3>
+                            <p>Konfiguroimatonta</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <button class="button" onclick="downloadAllQRs()" style="font-size: 16px; padding: 12px 30px;">📥 Lataa kaikki QR-koodit</button>
+                    </div>
+                    <div class="qr-grid" id="qr-grid"></div>
+                </div>
+            </div>
+
+            <div id="url-config" class="tab-content">
+                <div class="admin-panel">
+                    <div class="action-buttons">
+                        <button class="button" onclick="exportConfig()">📥 Lataa asetukset</button>
+                        <button class="button" onclick="document.getElementById('import-file').click()">📤 Tuo asetukset</button>
+                        <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importConfig(event)">
+                    </div>
+                    
+                    <div class="search-box">
+                        <input type="text" id="search" placeholder="🔍 Hae QR-koodia..." oninput="filterConfigs()">
+                    </div>
+                    
+                    <div id="config-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const TOTAL_QR_CODES = 100;
+        const ADMIN_PASSWORD = 'pohhoc-3kawtI-xikwin';
+
+        function checkPassword() {
+            const password = document.getElementById('password-input').value;
+            const errorMsg = document.getElementById('error-message');
+            
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('isLoggedIn', 'true');
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('logout-btn').style.display = 'block';
+                errorMsg.style.display = 'none';
+                generateQRCodes();
+                generateConfigList();
+                updateStats();
+            } else {
+                errorMsg.style.display = 'block';
+                document.getElementById('password-input').value = '';
+            }
+        }
+
+        function isLoggedIn() {
+            return localStorage.getItem('isLoggedIn') === 'true';
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function generateQRCodes() {
+            const grid = document.getElementById('qr-grid');
+            grid.innerHTML = '';
+            
+            const baseURL = window.location.origin + window.location.pathname;
+            
+            for (let i = 1; i <= TOTAL_QR_CODES; i++) {
+                const qrId = String(i).padStart(3, '0');
+                const url = `${baseURL}?qr=${qrId}`;
+                
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                card.innerHTML = `
+                    <h3>QR ${qrId}</h3>
+                    <canvas id="qr-${qrId}"></canvas>
+                    <div style="display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; justify-content: center;">
+                        <a href="${url}" target="_blank" class="button download-btn" style="font-size: 12px; padding: 8px 12px;">Testaa</a>
+                        <button class="button" onclick="downloadQR('${qrId}')" style="font-size: 12px; padding: 8px 12px;">📥 Lataa</button>
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+                
+                new QRious({
+                    element: document.getElementById(`qr-${qrId}`),
+                    value: url,
+                    size: 150
+                });
+            }
+        }
+
+        function getRedirectURLs() {
+            const stored = localStorage.getItem('qr-redirects');
+            if (stored) {
+                const urls = JSON.parse(stored);
+                console.log('Ladattu localStorage:', urls);
+                return urls;
+            }
+            
+            // Oletusarvoiset URL-osoitteet (vain jos ei ole tallennettuja)
+            const defaultURLs = {
+                '001': 'https://www.puuhapark.fi',
+                '002': 'https://www.hiidenlinna.com/',
+                '003': 'https://www.vihtiski.fi/',
+                '004': 'https://vihdinkino.fi/',
+                '005': 'https://hillside.fi/',
+                '006': 'https://koirankuje.fi/',
+                '007': 'https://www.unitedfestivals.fi/hiidenkirnufestival/',
+                '008': 'https://www.veikkolankartano.fi/',
+                '009': 'https://www.vihtiseura.fi/',
+                '010': 'https://hevoslaakso.fi/',
+                '011': 'https://www.hawkhill.fi/',
+                '012': 'https://www.nuuksiontaika.fi/',
+                '013': 'https://studio59.fi/',
+                '014': 'https://www.visitvihti.fi/',
+                '015': 'https://www.vihti.fi/kulttuuri-ja-vapaa-aika/museo/',
+                '016': 'https://selli.fi/',
+                '017': 'https://ilonaliikunta.fi/',
+                '018': 'https://www.ofeigur.net/',
+                '019': 'https://www.pahantorjuja.fi/',
+                '020': 'https://vinha.net/',
+                '021': 'https://liikuntakeskusposeidon.fi/',
+                '022': 'https://www.villajoutsela.fi/',
+                '023': 'https://www.skuti.fi/',
+                '024': 'https://poistielta.com/',
+                '025': 'https://www.nups.fi/',
+                '026': 'https://vihdinteatteri.fi/',
+                '027': 'https://vihti.mll.fi/',
+                '028': 'https://www.suurvihdinkilta.com/',
+                '029': 'https://vihdinkalastusseura.fi/',
+                '030': 'https://www.harjunkiekko.fi/',
+                '031': 'https://www.rasti-vihti.fi/',
+                '032': 'https://www.dogsndeli.fi/',
+                '033': 'https://www.visitvihti.fi/seikkailu/wefly/',
+                '034': 'https://www.vihti.fi/kulttuuri-ja-vapaa-aika/galleria-pictor/'
+            };
+            
+            // Tallennetaan oletusarvot localStorageen vain ensimmäisellä kerralla
+            console.log('Alustetaan oletusarvot');
+            localStorage.setItem('qr-redirects', JSON.stringify(defaultURLs));
+            return defaultURLs;
+        }
+
+        function saveRedirectURL(qrId, url) {
+            console.log('saveRedirectURL kutsuttu:', qrId, url);
+            const urls = getRedirectURLs();
+            console.log('Nykyiset URL:t ennen tallennusta:', urls);
+            
+            if (url && url.trim()) {
+                urls[qrId] = url.trim();
+                console.log('Lisätty:', qrId, '→', url.trim());
+            } else {
+                delete urls[qrId];
+                console.log('Poistettu:', qrId);
+            }
+            
+            localStorage.setItem('qr-redirects', JSON.stringify(urls));
+            console.log('Tallennettu localStorageen:', urls);
+            
+            // Tarkista että todella tallentui
+            const verification = localStorage.getItem('qr-redirects');
+            console.log('Varmistus - localStorage sisältö:', JSON.parse(verification));
+            
+            updateStats();
+            generateConfigList(); // Päivitetään lista
+            return true;
+        }
+
+        function saveAndNotify(qrId) {
+            console.log('saveAndNotify kutsuttu QR:lle', qrId);
+            const urlInput = document.getElementById(`url-${qrId}`);
+            console.log('URL input elementti:', urlInput);
+            const url = urlInput.value;
+            console.log('URL arvo:', url);
+            
+            if (!url || !url.trim()) {
+                console.log('URL tyhjä!');
+                alert('Syötä URL-osoite ensin!');
+                return;
+            }
+            
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                console.log('URL ei ala http(s)://');
+                alert('URL:n pitää alkaa http:// tai https://');
+                return;
+            }
+            
+            console.log('Kutsutaan saveRedirectURL');
+            saveRedirectURL(qrId, url);
+            
+            const status = document.getElementById(`status-${qrId}`);
+            if (status) {
+                status.style.display = 'inline';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 2000);
+            }
+            console.log('Tallennus valmis');
+        }
+
+        function generateConfigList() {
+            const list = document.getElementById('config-list');
+            list.innerHTML = '';
+            const urls = getRedirectURLs();
+            
+            for (let i = 1; i <= TOTAL_QR_CODES; i++) {
+                const qrId = String(i).padStart(3, '0');
+                const currentURL = urls[qrId] || '';
+                
+                const config = document.createElement('div');
+                config.className = 'url-config';
+                config.dataset.qrId = qrId;
+                config.innerHTML = `
+                    <h3>QR ${qrId}</h3>
+                    <div class="form-group">
+                        <label for="url-${qrId}">Kohde-URL:</label>
+                        <input type="url" id="url-${qrId}" value="${currentURL}" 
+                               placeholder="https://example.com">
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <button class="button" onclick="saveAndNotify('${qrId}')" style="font-size: 13px; padding: 8px 16px;">💾 Tallenna</button>
+                        ${currentURL ? `<button class="button danger" onclick="clearURL('${qrId}')" style="font-size: 13px; padding: 8px 16px;">🗑️ Tyhjennä</button>` : ''}
+                        <span id="status-${qrId}" style="color: green; font-size: 12px; display: none;">✓ Tallennettu</span>
+                    </div>
+                `;
+                
+                list.appendChild(config);
+            }
+        }
+
+        function clearURL(qrId) {
+            if (confirm(`Haluatko varmasti tyhjentää QR ${qrId} URL:n?`)) {
+                saveRedirectURL(qrId, '');
+                generateConfigList();
+            }
+        }
+
+        function downloadQR(qrId) {
+            const canvas = document.getElementById(`qr-${qrId}`);
+            const url = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `QR-${qrId}.png`;
+            link.href = url;
+            link.click();
+        }
+
+        function downloadAllQRs() {
+            if (!confirm('Haluatko ladata kaikki 100 QR-koodia? Tämä voi kestää hetken.')) {
+                return;
+            }
+            
+            let downloaded = 0;
+            const interval = setInterval(() => {
+                if (downloaded >= TOTAL_QR_CODES) {
+                    clearInterval(interval);
+                    alert('Kaikki QR-koodit ladattu!');
+                    return;
+                }
+                
+                downloaded++;
+                const qrId = String(downloaded).padStart(3, '0');
+                downloadQR(qrId);
+            }, 200); // 200ms viive jokaisen latauksen välillä
+        }
+
+        function filterConfigs() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const configs = document.querySelectorAll('.url-config');
+            
+            configs.forEach(config => {
+                const qrId = config.dataset.qrId.toLowerCase();
+                config.style.display = qrId.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        function exportConfig() {
+            const urls = getRedirectURLs();
+            const dataStr = JSON.stringify(urls, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `qr-config-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        function importConfig(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    localStorage.setItem('qr-redirects', JSON.stringify(config));
+                    alert('Asetukset tuotu onnistuneesti!');
+                    generateConfigList();
+                    updateStats();
+                } catch (error) {
+                    alert('Virhe asetuksia tuotaessa: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function updateStats() {
+            const urls = getRedirectURLs();
+            const configured = Object.keys(urls).length;
+            const unconfigured = TOTAL_QR_CODES - configured;
+            
+            document.getElementById('configured-qr').textContent = configured;
+            document.getElementById('unconfigured-qr').textContent = unconfigured;
+        }
+
+        function handleRedirect() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let qrId = urlParams.get('qr');
+            
+            if (qrId) {
+                // Normalisoi QR ID kolminumeroiseksi (esim. "35" -> "035")
+                qrId = String(qrId).padStart(3, '0');
+                console.log('QR redirect: qrId =', qrId);
+                
+                const urls = getRedirectURLs();
+                console.log('Kaikki URL:t:', urls);
+                const targetURL = urls[qrId];
+                console.log('Haettu URL avaimella', qrId, ':', targetURL);
+                
+                if (targetURL) {
+                    console.log('Ohjataan:', targetURL);
+                    window.location.href = targetURL;
+                } else {
+                    console.log('URL ei löytynyt!');
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; text-align: center; font-family: sans-serif;">
+                            <div>
+                                <h2 style="color: #dc3545;">⚠️ QR-koodi ${qrId} ei ole konfiguroitu</h2>
+                                <p>Ota yhteyttä järjestelmän ylläpitäjään.</p>
+                                <p style="font-size: 12px; color: #666; margin-top: 20px;">Debug: Avain "${qrId}" ei löydy localStoragesta</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('qr')) {
+                handleRedirect();
+                return;
+            }
+
+            if (isLoggedIn()) {
+                document.getElementById('login-overlay').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                document.getElementById('logout-btn').style.display = 'block';
+                generateQRCodes();
+                generateConfigList();
+                updateStats();
+            } else {
+                document.getElementById('login-overlay').style.display = 'flex';
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('password-input').focus();
+            }
+        });
+    </script>
 </body>
 </html>
